@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Claude Design QA artifacts (not part of the site)
+_*.png
+.thumbnail
