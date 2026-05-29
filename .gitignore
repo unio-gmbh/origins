@@ -4,3 +4,6 @@
 # Claude Design QA artifacts (not part of the site)
 _*.png
 .thumbnail
+
+# Source uploads bundled by Claude Design — not referenced by the site
+uploads/

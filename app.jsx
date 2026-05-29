@@ -1,6 +1,6 @@
 /* global React, ReactDOM, ORIGINS_DATA, ORIGINS_I18N,
    Hero, Concept, Opportunity, OriginalState, UnitCollection,
-   Potential, Location, Process, ByUnio, FinalCTA, Footer, OriginMark, StoererBand, Clarity,
+   Potential, Location, Process, ByUnio, FinalCTA, Footer, OriginMark, StoererBand, Clarity, EnquiryModal,
    TweaksPanel, TweakSection, TweakRadio, TweakSelect, TweakToggle, TweakColor, useTweaks */
 
 (function () {
@@ -23,7 +23,8 @@
     const [activeNav, setActiveNav] = useState("projekt");
     const [showSticky, setShowSticky] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const FINDER_EMAIL = "office@origins-wien.at";
+    const [enquiryOpen, setEnquiryOpen] = useState(false);
+    const [enquiryUnit, setEnquiryUnit] = useState(null);
 
     // Scroll observers
     useEffect(() => {
@@ -87,12 +88,8 @@
     };
 
     const startEnquiry = (unit = null) => {
-      if (unit) {
-        const subject = encodeURIComponent(`Anfrage ${unit.top} · ${unit.code} · Maxing 72/74`);
-        window.location.href = `mailto:${FINDER_EMAIL}?subject=${subject}`;
-      } else {
-        scrollTo("einheiten");
-      }
+      setEnquiryUnit(unit || null);
+      setEnquiryOpen(true);
     };
 
     const navItems = [
@@ -163,7 +160,7 @@
           </nav>
           <div className="on-menu-foot">
             <button className="btn btn-primary" onClick={() => { setMenuOpen(false); setTimeout(() => startEnquiry(), 60); }}>
-              {i18n.hero_cta_secondary} <span className="arrow">→</span>
+              {i18n.nav_cta} <span className="arrow">→</span>
             </button>
             <div className="on-menu-meta">
               <span className="meta mono">Maxingstraße 72 &amp; 74 · 1130 Wien</span>
@@ -182,8 +179,6 @@
 
           <Opportunity t={i18n} />
 
-          <StoererBand src="assets/photos/stoerer.jpg" />
-
           <UnitCollection t={i18n} units={ORIGINS_DATA.units} onEnquire={startEnquiry} />
 
           <OriginalState t={i18n} faq={ORIGINS_DATA.faq[t.lang === "en" ? "en" : "de"]} />
@@ -192,9 +187,13 @@
             materials={ORIGINS_DATA.materials}
             comparisons={ORIGINS_DATA.comparisons[t.lang === "en" ? "en" : "de"]} />
 
+          <StoererBand src="assets/photos/stoerer.jpg" />
+
           <Clarity t={i18n}
             objections={ORIGINS_DATA.objections[t.lang === "en" ? "en" : "de"]}
             costTiers={ORIGINS_DATA.costTiers[t.lang === "en" ? "en" : "de"]} />
+
+          <Umgebung t={i18n} environs={ORIGINS_DATA.environs[t.lang === "en" ? "en" : "de"]} />
 
           <Location t={i18n} />
 
@@ -206,6 +205,8 @@
 
           <Footer t={i18n} />
         </main>
+
+        <EnquiryModal open={enquiryOpen} unit={enquiryUnit} t={i18n} onClose={() => setEnquiryOpen(false)} />
 
         {/* Sticky inquiry bar */}
         {t.showInquiryBar && showSticky && activeNav !== "kontakt" && (

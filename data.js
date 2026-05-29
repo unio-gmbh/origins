@@ -286,6 +286,30 @@ window.ORIGINS_DATA = (function () {
   };
 
   // ---- Materials ----
+  const environs = {
+    de: [
+      { img: "assets/photos/env-c.jpg", t: "Maxingstraße", d: "Die Adresse · 1130 Hietzing", span: "wide" },
+      { img: "assets/photos/env-f.jpg", t: "Schlosspark · Allee", d: "≈ 5 Min. zu Fuß" },
+      { img: "assets/photos/env-a.jpg", t: "Tiergarten Schönbrunn", d: "Kaiserpavillon" },
+      { img: "assets/photos/env-d.jpg", t: "Pergola", d: "Schlosspark" },
+      { img: "assets/photos/env-g.jpg", t: "Gloriette & Großes Parterre", d: "≈ 15 Min. zu Fuß", span: "wide" },
+      { img: "assets/photos/env-b.jpg", t: "Tiergarten", d: "Ältester Zoo der Welt" },
+      { img: "assets/photos/env-e.jpg", t: "Kammergarten", d: "Blumenparterre" },
+      { img: "assets/photos/env-h.jpg", t: "Schloss Schönbrunn", d: "UNESCO-Welterbe" },
+    ],
+    en: [
+      { img: "assets/photos/env-c.jpg", t: "Maxingstraße", d: "The address · 1130 Hietzing", span: "wide" },
+      { img: "assets/photos/env-f.jpg", t: "Palace park · alley", d: "≈ 5 min on foot" },
+      { img: "assets/photos/env-a.jpg", t: "Schönbrunn Zoo", d: "Imperial pavilion" },
+      { img: "assets/photos/env-d.jpg", t: "Pergola", d: "Palace park" },
+      { img: "assets/photos/env-g.jpg", t: "Gloriette & Great Parterre", d: "≈ 15 min on foot", span: "wide" },
+      { img: "assets/photos/env-b.jpg", t: "Zoo", d: "World's oldest zoo" },
+      { img: "assets/photos/env-e.jpg", t: "Chamber garden", d: "Flower parterre" },
+      { img: "assets/photos/env-h.jpg", t: "Schönbrunn Palace", d: "UNESCO World Heritage" },
+    ]
+  };
+
+  // ---- Materials ----
   const materials = [
     { name: "Eichenparkett · Fischgrät", img: "assets/photos/mat-eiche.jpg",        color: "#c2a274" },
     { name: "Wandvertäfelung · Weiß",    img: "assets/photos/mat-vertaefelung.jpg", color: "#efe9e1" },
@@ -426,5 +450,5 @@ window.ORIGINS_DATA = (function () {
     "assets/photos/74-PR0306-1.jpg",  // a quiet room
   ];
 
-  return { units, faq, process, materials, directions, comparisons, objections, costTiers, heroPhoto, potentialPhotos };
+  return { units, faq, process, materials, directions, comparisons, objections, costTiers, environs, heroPhoto, potentialPhotos };
 })();

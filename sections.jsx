@@ -49,11 +49,6 @@
 
         {/* Foreground content */}
         <div className="hero-content">
-          <div className="hero-eyebrow">
-            <OriginMark size={14} stroke="currentColor" />
-            <span className="eyebrow">{t.hero_eyebrow}</span>
-          </div>
-
           <h1 className="hero-h">
             <span className="hero-line"><span>{t.hero_claim_a}</span></span>
             <span className="hero-line hero-line-em"><span><em>{t.hero_claim_b}</em></span></span>
@@ -64,9 +59,6 @@
           <div className="hero-ctas">
             <button className="btn btn-primary hero-btn" onClick={onScrollUnits}>
               {t.hero_cta_primary} <span className="arrow">→</span>
-            </button>
-            <button className="btn-link hero-secondary" onClick={onEnquire}>
-              {t.hero_cta_secondary} <span className="arrow">→</span>
             </button>
           </div>
         </div>
@@ -125,6 +117,7 @@
           </div>
 
           {/* Stat band */}
+          {/* Stat band — KPIs first */}
           <div className="stat-band" data-reveal-children>
             {stats.map((s, i) => (
               <div key={i} className="stat">
@@ -134,6 +127,14 @@
                 <span className="stat-l meta">{s.label}</span>
               </div>
             ))}
+          </div>
+
+          {/* Early imagery — building + interiors (after KPIs, shorter, more images) */}
+          <div className="concept-media" data-reveal>
+            <figure className="concept-media-cell"><img src={imgSrc("assets/photos/72-PR0308-1.jpg")} alt="Maxingstraße 72 · Hauseingang" loading="lazy" /><figcaption className="meta mono">Maxing 72 · Bestand</figcaption></figure>
+            <figure className="concept-media-cell"><img src={imgSrc("assets/photos/konz-74.jpg")} alt="Maxing 74 · grundsanierte Wohnung" loading="lazy" /><figcaption className="meta mono">Maxing 74 · saniert</figcaption></figure>
+            <figure className="concept-media-cell"><img src={imgSrc("assets/photos/74-PR0311-1.jpg")} alt="Wohnraum · Licht" loading="lazy" /><figcaption className="meta mono">Maxing 74 · Wohnraum</figcaption></figure>
+            <figure className="concept-media-cell"><img src={imgSrc("assets/photos/konz-72.jpg")} alt="Maxing 72 · Zimmer im Originalzustand" loading="lazy" /><figcaption className="meta mono">Maxing 72 · Originalzustand</figcaption></figure>
           </div>
 
           {/* 3 pills */}
@@ -382,6 +383,40 @@
     );
   }
   window.StoererBand = StoererBand;
+
+  // -------------------------------------------------------------------
+  // Umgebung — editorial gallery of the surroundings (before Location)
+  // -------------------------------------------------------------------
+  function Umgebung({ t, environs }) {
+    const items = (environs || []).filter(e => imgSrc(e.img).startsWith("data:"));
+    if (items.length === 0) return null;
+    return (
+      <section id="umgebung" className="section sec-umgebung section-stone" data-screen-label="Umgebung">
+        <div className="container">
+          <header className="sec-head" data-reveal>
+            <span className="eyebrow eyebrow-dot">{t.umg_eyebrow}</span>
+            <h2 className="display-2">{t.umg_h}</h2>
+            <p className="lede col-7" style={{ marginTop: 24 }}>{t.umg_lede}</p>
+          </header>
+
+          <div className="umg-grid" data-reveal-children>
+            {items.map((e, i) => (
+              <figure key={i} className={`umg-cell ${e.span === "wide" ? "is-wide" : ""}`}>
+                <div className="umg-img">
+                  <img src={imgSrc(e.img)} alt={e.t} loading="lazy" />
+                </div>
+                <figcaption className="umg-cap">
+                  <span className="umg-t">{e.t}</span>
+                  <span className="umg-d meta mono">{e.d}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+  window.Umgebung = Umgebung;
 
   // -------------------------------------------------------------------
   // Clarity — disarm the most common buyer objections
@@ -708,6 +743,79 @@
   }
 
   // -------------------------------------------------------------------
+  // Enquiry modal — Albrecht-style popup, opened from unit "Anfragen"
+  // -------------------------------------------------------------------
+  function EnquiryModal({ open, unit, t, onClose }) {
+    const [form, setForm] = useState({ first: "", last: "", email: "", phone: "", msg: "" });
+    const [sent, setSent] = useState(false);
+    const [prov, setProv] = useState(false);
+
+    useEffect(() => {
+      if (open) {
+        document.body.style.overflow = "hidden";
+        setSent(false);
+        setForm({ first: "", last: "", email: "", phone: "", msg: "" });
+        setProv(false);
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        window.addEventListener("keydown", onKey);
+        return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKey); };
+      }
+      document.body.style.overflow = "";
+    }, [open]);
+
+    if (!open) return null;
+    const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const submit = (e) => { e.preventDefault(); setSent(true); };
+    const chip = unit
+      ? `${unit.top} · ${unit.rooms} Zi · ${unit.size.toFixed(2).replace(".", ",")} m²`
+      : t.enq_general;
+
+    return (
+      <div className="enq-scrim" onClick={onClose} role="dialog" aria-modal="true">
+        <div className="enq" onClick={(e) => e.stopPropagation()}>
+          <button className="enq-close" onClick={onClose} aria-label="Schließen">
+            <svg width="15" height="15" viewBox="0 0 14 14"><path d="M1 1 L13 13 M13 1 L1 13" stroke="currentColor" strokeWidth="1.2"/></svg>
+          </button>
+
+          {sent ? (
+            <div className="enq-sent">
+              <OriginMark size={26} stroke="var(--court-brass)" />
+              <h3 className="display-4 enq-sent-h">{t.enq_sent_h}</h3>
+              <p className="enq-sent-b">{t.enq_sent_b}</p>
+              <button className="btn btn-primary" onClick={onClose}>{t.enq_close} <span className="arrow">→</span></button>
+            </div>
+          ) : (
+            <form className="enq-form" onSubmit={submit}>
+              <h3 className="enq-title">{t.enq_title}</h3>
+              <span className="enq-chip">{chip}</span>
+              <span className="enq-via meta">{t.enq_via}</span>
+
+              <div className="enq-row">
+                <Field label={t.enq_first} value={form.first} onChange={(v) => up("first", v)} required />
+                <Field label={t.enq_last} value={form.last} onChange={(v) => up("last", v)} required />
+              </div>
+              <Field label={t.enq_email} type="email" value={form.email} onChange={(v) => up("email", v)} required />
+              <Field label={t.enq_phone} value={form.phone} onChange={(v) => up("phone", v)} required />
+              <Field label={t.enq_msg} value={form.msg} onChange={(v) => up("msg", v)} multi placeholder={t.enq_msg_ph} />
+
+              <div className="enq-actions">
+                <button type="button" className="btn btn-secondary" onClick={onClose}>{t.enq_cancel}</button>
+                <button type="submit" className="btn btn-primary enq-send">{t.enq_send}</button>
+              </div>
+
+              <button type="button" className="enq-prov-toggle" onClick={() => setProv(p => !p)}>
+                {t.enq_provision} <span className={`enq-prov-caret ${prov ? "is-open" : ""}`}>⌄</span>
+              </button>
+              {prov && <p className="enq-prov-text meta">{t.enq_provision_text}</p>}
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
+  window.EnquiryModal = EnquiryModal;
+
+  // -------------------------------------------------------------------
   // Footer
   // -------------------------------------------------------------------
   function Footer({ t }) {
@@ -762,9 +870,9 @@
         <div className="of-bottom">
           <span>Vermarktet bei <a href="https://app.unio.at" target="_blank" rel="noopener">Unio Verse GmbH</a> · Homepage <a href="https://www.ad.boutique" target="_blank" rel="noopener">Ad Boutique</a></span>
           <span className="of-legal">
-            <a href="https://albrecht.unio.at/Impressum" target="_blank" rel="noopener">{t.footer_legal_a}</a>
+            <a href="https://www.unio.at/impressum" target="_blank" rel="noopener">{t.footer_legal_a}</a>
             <span className="of-dot">·</span>
-            <a href="https://albrecht.unio.at/Datenschutz" target="_blank" rel="noopener">{t.footer_legal_b}</a>
+            <a href="https://www.unio.at/datenschutz" target="_blank" rel="noopener">{t.footer_legal_b}</a>
           </span>
           <span className="mono on-dark muted-d">48.184° N · 16.302° E</span>
         </div>
