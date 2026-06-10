@@ -2981,6 +2981,8 @@ figure.drawer-plan img {
 }
 .enq-form .cta-field input:focus,
 .enq-form .cta-field textarea:focus { border-bottom-color: var(--court-brass); }
+.enq-error { color: #9a3b2e; margin: 0 0 10px; }
+.enq-send[disabled], .enq-actions .btn[disabled] { opacity: 0.6; cursor: default; pointer-events: none; }
 .enq-actions { display: flex; gap: 12px; margin-top: 6px; }
 .enq-actions .btn { flex: 1; justify-content: center; }
 .enq-send { background: var(--court-graphite); color: var(--court-offwhite); border: 0; }
@@ -4359,6 +4361,8 @@ window.ORIGINS_I18N = {
     enq_msg_ph: "Ich interessiere mich für diese Wohnung…",
     enq_cancel: "Abbrechen",
     enq_send: "Absenden",
+    enq_sending: "Wird gesendet …",
+    enq_error: "Senden fehlgeschlagen. Bitte erneut versuchen oder per E-Mail melden.",
     enq_close: "Schließen",
     enq_provision: "Provisionshinweis anzeigen",
     enq_provision_text: "Wir sind als Vermittler tätig. Die Vermittlungsprovision beträgt 3 % des Kaufpreises zzgl. USt. Es besteht ein wirtschaftliches Naheverhältnis im Sinne des § 30b KSchG / MaklerG.",
@@ -4551,6 +4555,8 @@ window.ORIGINS_I18N = {
     enq_msg_ph: "I'm interested in this apartment…",
     enq_cancel: "Cancel",
     enq_send: "Send",
+    enq_sending: "Sending …",
+    enq_error: "Could not send. Please try again or contact us by email.",
     enq_close: "Close",
     enq_provision: "Show commission notice",
     enq_provision_text: "We act as a broker. The brokerage commission is 3% of the purchase price plus VAT. A close economic relationship exists within the meaning of the Austrian broker law.",
@@ -5867,12 +5873,16 @@ Object.assign(window, {
   function EnquiryModal({ open, unit, t, onClose }) {
     const [form, setForm] = useState({ first: "", last: "", email: "", phone: "", msg: "" });
     const [sent, setSent] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [error, setError] = useState(false);
     const [prov, setProv] = useState(false);
 
     useEffect(() => {
       if (open) {
         document.body.style.overflow = "hidden";
         setSent(false);
+        setSending(false);
+        setError(false);
         setForm({ first: "", last: "", email: "", phone: "", msg: "" });
         setProv(false);
         const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -5884,7 +5894,46 @@ Object.assign(window, {
 
     if (!open) return null;
     const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
-    const submit = (e) => { e.preventDefault(); setSent(true); };
+    const submit = async (e) => {
+      e.preventDefault();
+      if (sending) return;
+      setSending(true); setError(false);
+      try {
+        const p = new URLSearchParams(window.location.search);
+        const payload = {
+          firstName: form.first.trim(),
+          lastName: form.last.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          message: (unit ? `Anfrage zu ${unit.top} · ${unit.code} · ${unit.size.toFixed(2).replace(".", ",")} m²\n\n` : "") + (form.msg || ""),
+          landingPageName: "ORIGINS M72/74",
+          landingPageSlug: "origins-m72-74",
+          formName: "Anfrageformular",
+          pageUrl: window.location.href,
+          referrer: document.referrer || undefined,
+          utmSource: p.get("utm_source") || undefined,
+          utmMedium: p.get("utm_medium") || undefined,
+          utmCampaign: p.get("utm_campaign") || undefined,
+          utmContent: p.get("utm_content") || undefined,
+          utmTerm: p.get("utm_term") || undefined,
+          gclid: p.get("gclid") || undefined,
+          fbclid: p.get("fbclid") || undefined,
+          submittedAt: new Date().toISOString(),
+        };
+        const res = await fetch("/api/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("lead request failed: " + res.status);
+        setSent(true);
+      } catch (err) {
+        console.error("Lead submission failed:", err);
+        setError(true);
+      } finally {
+        setSending(false);
+      }
+    };
     const chip = unit
       ? `${unit.top} · ${unit.rooms} Zi · ${unit.size.toFixed(2).replace(".", ",")} m²`
       : t.enq_general;
@@ -5917,9 +5966,10 @@ Object.assign(window, {
               <Field label={t.enq_phone} value={form.phone} onChange={(v) => up("phone", v)} required />
               <Field label={t.enq_msg} value={form.msg} onChange={(v) => up("msg", v)} multi placeholder={t.enq_msg_ph} />
 
+              {error && <p className="enq-error meta">{t.enq_error}</p>}
               <div className="enq-actions">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>{t.enq_cancel}</button>
-                <button type="submit" className="btn btn-primary enq-send">{t.enq_send}</button>
+                <button type="button" className="btn btn-secondary" onClick={onClose} disabled={sending}>{t.enq_cancel}</button>
+                <button type="submit" className="btn btn-primary enq-send" disabled={sending}>{sending ? t.enq_sending : t.enq_send}</button>
               </div>
 
               <button type="button" className="enq-prov-toggle" onClick={() => setProv(p => !p)}>
