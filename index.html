@@ -5905,10 +5905,12 @@ Object.assign(window, {
           lastName: form.last.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
-          message: (unit ? `Anfrage zu ${unit.top} · ${unit.code} · ${unit.size.toFixed(2).replace(".", ",")} m²\n\n` : "") + (form.msg || ""),
+          message: unit
+            ? `Anfrage zu ${unit.top} · ${unit.code} · ${unit.size.toFixed(2).replace(".", ",")} m²${(form.msg && form.msg.trim()) ? "\n\n" + form.msg.trim() : ""}`
+            : ((form.msg && form.msg.trim()) ? form.msg.trim() : "Allgemeine Anfrage / Beratung"),
           landingPageName: "ORIGINS M72/74",
           landingPageSlug: "origins-m72-74",
-          formName: "Anfrageformular",
+          formName: unit ? "Wohnungsanfrage" : "Allgemeine Anfrage",
           pageUrl: window.location.href,
           referrer: document.referrer || undefined,
           utmSource: p.get("utm_source") || undefined,
