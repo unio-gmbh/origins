@@ -5405,7 +5405,7 @@ Object.assign(window, {
               {materials.map((m, i) => (
                 <div key={i} className="mat">
                   <span className="mat-swatch" style={{ background: m.color }}>
-                    {m.img && imgSrc(m.img).startsWith("data:") && <img src={imgSrc(m.img)} alt={m.name} loading="lazy" />}
+                    {m.img && <img src={imgSrc(m.img)} alt={m.name} loading="lazy" />}
                   </span>
                   <span className="mat-n meta mono">{String(i + 1).padStart(2, "0")}</span>
                   <span className="mat-name">{m.name}</span>
@@ -5491,7 +5491,7 @@ Object.assign(window, {
   }
 
   function StoererBand({ src }) {
-    if (!imgSrc(src).startsWith("data:")) return null;
+    if (!src) return null;
     return (
       <section className="stoerer" data-screen-label="Building" data-reveal>
         <img src={imgSrc(src)} alt="M72/74 · Straßenansicht, 1130 Wien" loading="lazy" />
@@ -5507,7 +5507,7 @@ Object.assign(window, {
   // Umgebung — editorial gallery of the surroundings (before Location)
   // -------------------------------------------------------------------
   function Umgebung({ t, environs }) {
-    const items = (environs || []).filter(e => imgSrc(e.img).startsWith("data:"));
+    const items = (environs || []).filter(e => e.img);
     if (items.length === 0) return null;
     return (
       <section id="umgebung" className="section sec-umgebung section-stone" data-screen-label="Umgebung">
